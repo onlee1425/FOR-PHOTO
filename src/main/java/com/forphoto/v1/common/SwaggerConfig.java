@@ -35,7 +35,7 @@ public class SwaggerConfig {
                 .protocols(new HashSet<>(Arrays.asList("http", "https")))
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.fotPhoto.beta"))
+                .apis(RequestHandlerSelectors.basePackage("com.forphoto.v1"))
                 .paths(PathSelectors.any())
                 .build()
                 .securityContexts(Arrays.asList(securityContext()))
@@ -44,7 +44,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("포포토 API Document")
+                .title("포포토 API")
                 .description("FOR-PHOTO API")
                 .version("1.0.0")
                 .build();
