@@ -1,10 +1,7 @@
 package com.forphoto.v1.domain.album.entity;
 
 import com.forphoto.v1.domain.photo.entity.Photo;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -32,4 +29,8 @@ public class Album {
     @Column(name = "created_at")
     @CreationTimestamp
     private Date createdAt;
+
+    public void setAlbumName(String albumName){
+        this.albumName = albumName;
+    }
 }
