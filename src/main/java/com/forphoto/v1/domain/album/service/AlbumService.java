@@ -5,16 +5,18 @@ import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.mapper.AlbumMapper;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AlbumService {
 
-    private AlbumRepository albumRepository;
-    private PhotoRepository photoRepository;
+    private final AlbumRepository albumRepository;
+    private final PhotoRepository photoRepository;
 
     public AlbumInfoResponse getAlbum(Long albumId) {
         Optional<Album> result = albumRepository.findById(albumId);
