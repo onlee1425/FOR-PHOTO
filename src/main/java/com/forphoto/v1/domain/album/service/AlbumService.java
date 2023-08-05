@@ -1,6 +1,7 @@
 package com.forphoto.v1.domain.album.service;
 
 import com.forphoto.v1.domain.album.dto.AlbumInfoResponse;
+import com.forphoto.v1.domain.album.dto.CreateAlbumResponse;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -32,5 +34,22 @@ public class AlbumService {
         } else {
             throw new EntityNotFoundException(String.format("앨범 아이디 %d로 조회되지 않았습니다", albumId));
         }
+    }
+
+    public CreateAlbumResponse createAlbum(String albumName) {
+        Album album = Album.builder()
+                .albumName(albumName)
+                .createdAt(new Date())
+                .build();
+
+        Album createdAlbum = albumRepository.save(album);
+
+        CreateAlbumResponse response = new CreateAlbumResponse();
+        response.setAlbumId(createdAlbum.getAlbumId());
+        response.setAlbumName(createdAlbum.getAlbumName());
+        response.setCreatedAt(createdAlbum.getCreatedAt());
+        response.setCount(0);
+
+        return response;
     }
 }
