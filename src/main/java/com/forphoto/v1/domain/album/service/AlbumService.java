@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,6 +38,11 @@ public class AlbumService {
     }
 
     public CreateAlbumResponse createAlbum(String albumName) {
+        List<Album> existAlbumName = albumRepository.findByAlbumName(albumName);
+        if (!existAlbumName.isEmpty()) {
+            throw new IllegalArgumentException("중복된 앨범명입니다.");
+        }
+
         Album album = Album.builder()
                 .albumName(albumName)
                 .createdAt(new Date())
