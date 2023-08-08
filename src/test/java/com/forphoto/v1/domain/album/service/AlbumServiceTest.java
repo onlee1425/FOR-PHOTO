@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,5 +97,28 @@ class AlbumServiceTest {
         assertEquals(mockAlbum.getCreatedAt(), response.getCreatedAt());
         assertEquals(0, response.getCount());
 
+    }
+
+    @Test
+    void testAlbumRepository() throws InterruptedException {
+        Album album1 = new Album();
+        Album album2 = new Album();
+        album1.setAlbumName("테스트1앨범");
+        album2.setAlbumName("테스트2앨범");
+
+        albumRepository.save(album1);
+        TimeUnit.SECONDS.sleep(1);
+        albumRepository.save(album2);
+
+        // 최신순 정렬
+        List<Album> resultDate = albumRepository.findByAlbumNameContainingOrderByCreatedAtDesc("테스트");
+
+        // 앨범명 정렬
+        List<Album> resultName = albumRepository.findByAlbumNameContainingOrderByAlbumNameDesc("테스트");
+
+        assertEquals(resultDate.size(), resultName.size());
+        for (int i = 0; i < resultDate.size(); i++) {
+            assertEquals(resultDate.get(i).getAlbumName(), resultName.get(i).getAlbumName());
+        }
     }
 }
