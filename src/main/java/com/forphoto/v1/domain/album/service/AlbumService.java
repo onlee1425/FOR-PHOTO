@@ -1,17 +1,18 @@
 package com.forphoto.v1.domain.album.service;
 
+import com.forphoto.v1.common.Constants;
 import com.forphoto.v1.domain.album.dto.AlbumInfoResponse;
+import com.forphoto.v1.domain.album.dto.AlbumListResponse;
 import com.forphoto.v1.domain.album.dto.CreateAlbumResponse;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
+import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,36 @@ public class AlbumService {
         response.setAlbumName(createdAlbum.getAlbumName());
         response.setCreatedAt(createdAlbum.getCreatedAt());
         response.setCount(0);
+
+        return response;
+    }
+
+    public List<AlbumListResponse> getAlbumList(String keyword,String sort){
+        List<Album> albums;
+        if (Objects.equals(sort, "byName")) {
+            albums = albumRepository.findByAlbumNameContainingOrderByAlbumNameAsc(keyword);
+        } else if (Objects.equals(sort, "byDate")) {
+            albums = albumRepository.findByAlbumNameContainingOrderByCreatedAtDesc(keyword);
+        } else {
+            throw new IllegalArgumentException("알 수 없는 정렬 기준입니다");
+        }
+
+        List<AlbumListResponse> response = new ArrayList<>();
+        for (Album album : albums) {
+            AlbumListResponse res = new AlbumListResponse();
+            res.setAlbumId(album.getAlbumId());
+            res.setAlbumName(album.getAlbumName());
+            res.setCreatedAt(album.getCreatedAt());
+
+            List<Photo> top4 = photoRepository.findTop4ByAlbum_AlbumIdOrderByUploadedAt(album.getAlbumId());
+            List<String> thumbUrls = new ArrayList<>();
+            for (Photo photo : top4) {
+                thumbUrls.add(Constants.PATH_PREFIX + photo.getThumbUrl());
+            }
+            res.setThumbUrl(thumbUrls);
+
+            response.add(res);
+        }
 
         return response;
     }
