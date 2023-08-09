@@ -103,22 +103,24 @@ class AlbumServiceTest {
     void testAlbumRepository() throws InterruptedException {
         Album album1 = new Album();
         Album album2 = new Album();
-        album1.setAlbumName("테스트1앨범");
-        album2.setAlbumName("테스트2앨범");
+        album1.setAlbumName("테스트 1앨범");
+        album2.setAlbumName("테스트 2앨범");
 
         albumRepository.save(album1);
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(3);
         albumRepository.save(album2);
 
-        // 최신순 정렬
         List<Album> resultDate = albumRepository.findByAlbumNameContainingOrderByCreatedAtDesc("테스트");
+        List<Album> resultName = albumRepository.findByAlbumNameContainingOrderByAlbumNameAsc("테스트");
 
-        // 앨범명 정렬
-        List<Album> resultName = albumRepository.findByAlbumNameContainingOrderByAlbumNameDesc("테스트");
+        // 최신순_내림차순 정렬 검증
+        assertEquals(2, resultDate.size());
+        assertEquals("테스트 2앨범", resultDate.get(0).getAlbumName());
+        assertEquals("테스트 1앨범", resultDate.get(1).getAlbumName());
 
-        assertEquals(resultDate.size(), resultName.size());
-        for (int i = 0; i < resultDate.size(); i++) {
-            assertEquals(resultDate.get(i).getAlbumName(), resultName.get(i).getAlbumName());
-        }
+        // 앨범명_오름차순 정렬 검증
+        assertEquals(2, resultName.size());
+        assertEquals("테스트 1앨범", resultName.get(0).getAlbumName());
+        assertEquals("테스트 2앨범", resultName.get(1).getAlbumName());
     }
 }
