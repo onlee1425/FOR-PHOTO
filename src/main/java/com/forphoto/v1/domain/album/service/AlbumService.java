@@ -9,12 +9,14 @@ import com.forphoto.v1.domain.album.repository.AlbumRepository;
 import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AlbumService {
 
@@ -62,6 +64,8 @@ public class AlbumService {
 
     public List<AlbumListResponse> getAlbumList(String keyword,String sort){
         List<Album> albums;
+        log.info("키워드 = " + keyword);
+        log.info("정렬 = " + sort);
         if (Objects.equals(sort, "byName")) {
             albums = albumRepository.findByAlbumNameContainingOrderByAlbumNameAsc(keyword);
         } else if (Objects.equals(sort, "byDate")) {
