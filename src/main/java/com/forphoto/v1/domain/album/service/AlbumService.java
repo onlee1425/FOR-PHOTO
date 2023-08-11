@@ -108,7 +108,7 @@ public class AlbumService {
 
         UpdateAlbumNameResponse response = new UpdateAlbumNameResponse();
         response.setAlbumId(updateAlbum.getAlbumId());
-        response.setAlbumId(updateAlbum.getAlbumId());
+        response.setAlbumName(updateAlbum.getAlbumName());
         response.setCreatedAt(updateAlbum.getCreatedAt());
         response.setCount(updateAlbum.getPhotos().size());
 
