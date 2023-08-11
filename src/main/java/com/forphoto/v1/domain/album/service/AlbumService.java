@@ -81,6 +81,7 @@ public class AlbumService {
             res.setAlbumId(album.getAlbumId());
             res.setAlbumName(album.getAlbumName());
             res.setCreatedAt(album.getCreatedAt());
+            res.setCount(album.getPhotos().size());
 
             List<Photo> top4 = photoRepository.findTop4ByAlbum_AlbumIdOrderByUploadedAt(album.getAlbumId());
             List<String> thumbUrls = new ArrayList<>();
