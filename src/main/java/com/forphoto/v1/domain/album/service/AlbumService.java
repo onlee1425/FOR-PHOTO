@@ -4,6 +4,7 @@ import com.forphoto.v1.common.Constants;
 import com.forphoto.v1.domain.album.dto.AlbumInfoResponse;
 import com.forphoto.v1.domain.album.dto.AlbumListResponse;
 import com.forphoto.v1.domain.album.dto.CreateAlbumResponse;
+import com.forphoto.v1.domain.album.dto.UpdateAlbumNameResponse;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
 import com.forphoto.v1.domain.photo.entity.Photo;
@@ -62,7 +63,7 @@ public class AlbumService {
         return response;
     }
 
-    public List<AlbumListResponse> getAlbumList(String keyword,String sort){
+    public List<AlbumListResponse> getAlbumList(String keyword, String sort) {
         List<Album> albums;
         log.info("키워드 = " + keyword);
         log.info("정렬 = " + sort);
@@ -90,6 +91,26 @@ public class AlbumService {
 
             response.add(res);
         }
+
+        return response;
+    }
+
+    public UpdateAlbumNameResponse changeName(Long AlbumId,String albumName) {
+        Optional<Album> album = this.albumRepository.findById(AlbumId);
+
+        if (album.isEmpty()) {
+            throw new NoSuchElementException("Album ID '%'가 존재하지 않습니다.");
+        }
+
+        Album updateAlbum = album.get();
+        updateAlbum.setAlbumName(albumName);
+        albumRepository.save(updateAlbum);
+
+        UpdateAlbumNameResponse response = new UpdateAlbumNameResponse();
+        response.setAlbumId(updateAlbum.getAlbumId());
+        response.setAlbumId(updateAlbum.getAlbumId());
+        response.setCreatedAt(updateAlbum.getCreatedAt());
+        response.setCount(updateAlbum.getPhotos().size());
 
         return response;
     }

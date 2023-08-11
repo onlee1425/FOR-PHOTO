@@ -1,11 +1,13 @@
 package com.forphoto.v1.domain.album.controller;
 
-import com.forphoto.v1.domain.album.dto.*;
+import com.forphoto.v1.domain.album.dto.AlbumInfoResponse;
+import com.forphoto.v1.domain.album.dto.AlbumListResponse;
+import com.forphoto.v1.domain.album.dto.CreateAlbumResponse;
+import com.forphoto.v1.domain.album.dto.UpdateAlbumNameResponse;
 import com.forphoto.v1.domain.album.service.AlbumService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,12 +44,23 @@ public class AlbumController {
 
     @ApiOperation(value = "앨범 목록 조회", notes = "생성된 앨범의 목록을 조회한다.")
     @GetMapping
-    public ResponseEntity<List<AlbumListResponse>> getAlbumList(@RequestParam(value = "keyword", required = false,defaultValue = "") final String keyword,
-                                                                @RequestParam(value = "sort", required = false,defaultValue = "byDate") final String sort) {
+    public ResponseEntity<List<AlbumListResponse>> getAlbumList(@RequestParam(value = "keyword", required = false, defaultValue = "") final String keyword,
+                                                                @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort) {
 
-        List<AlbumListResponse> AlbumList = albumService.getAlbumList(keyword,sort);
+        List<AlbumListResponse> AlbumList = albumService.getAlbumList(keyword, sort);
 
         return new ResponseEntity<>(AlbumList, HttpStatus.OK);
 
     }
+
+    @ApiOperation(value = "앨범명 변경", notes = "기존에 생성된 앨범의 이름을 수정한다.")
+    @PutMapping("/{albumId}")
+    public ResponseEntity<UpdateAlbumNameResponse> updateAlbumName(@PathVariable("albumId") final long albumId,
+                                                                   @RequestBody String updateAlbumName) {
+
+        UpdateAlbumNameResponse updateAlbum = albumService.changeName(albumId,updateAlbumName);
+
+        return new ResponseEntity<>(updateAlbum, HttpStatus.OK);
+    }
+
 }
