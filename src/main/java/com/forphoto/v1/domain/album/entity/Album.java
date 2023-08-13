@@ -20,7 +20,7 @@ public class Album {
     @Column(name = "album_id", unique = true, nullable = false)
     private long albumId;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "album")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "album", cascade = CascadeType.ALL)
     private List<Photo> photos;
 
     @Column(name = "album_name")
@@ -30,7 +30,7 @@ public class Album {
     @CreationTimestamp
     private Date createdAt;
 
-    public void setAlbumName(String albumName){
+    public void setAlbumName(String albumName) {
         this.albumName = albumName;
     }
 }

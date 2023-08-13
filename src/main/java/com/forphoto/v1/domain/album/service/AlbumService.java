@@ -96,8 +96,8 @@ public class AlbumService {
         return response;
     }
 
-    public UpdateAlbumNameResponse changeName(Long AlbumId,String albumName) {
-        Optional<Album> album = this.albumRepository.findById(AlbumId);
+    public UpdateAlbumNameResponse changeName(Long albumId, String albumName) {
+        Optional<Album> album = this.albumRepository.findById(albumId);
 
         if (album.isEmpty()) {
             throw new NoSuchElementException("Album ID '%'가 존재하지 않습니다.");
@@ -114,5 +114,14 @@ public class AlbumService {
         response.setCount(updateAlbum.getPhotos().size());
 
         return response;
+    }
+
+    public void deleteAlbum(Long albumId) {
+
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 앨범ID 입니다."));
+
+        albumRepository.delete(album);
+
     }
 }

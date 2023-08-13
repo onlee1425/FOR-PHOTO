@@ -58,9 +58,17 @@ public class AlbumController {
     public ResponseEntity<UpdateAlbumNameResponse> updateAlbumName(@PathVariable("albumId") final long albumId,
                                                                    @RequestBody String updateAlbumName) {
 
-        UpdateAlbumNameResponse updateAlbum = albumService.changeName(albumId,updateAlbumName);
+        UpdateAlbumNameResponse updateAlbum = albumService.changeName(albumId, updateAlbumName);
 
         return new ResponseEntity<>(updateAlbum, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "앨범 삭제", notes = "앨범을 삭제한다.")
+    @DeleteMapping("/{albumId}")
+    public void deleteAlbum(@PathVariable("albumId") final long albumId) {
+
+        albumService.deleteAlbum(albumId);
+
     }
 
 }
