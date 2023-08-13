@@ -7,7 +7,6 @@ import com.forphoto.v1.domain.album.repository.AlbumRepository;
 import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,10 +78,10 @@ class AlbumServiceTest {
         // Mock the repository behavior
         AlbumRepository albumRepositoryMock = mock(AlbumRepository.class);
         when(albumRepositoryMock.findByAlbumName(albumName)).thenReturn(new ArrayList<>());
-        when(albumRepositoryMock.save(Mockito.any(Album.class))).thenReturn(mockAlbum);
+        when(albumRepositoryMock.save(any(Album.class))).thenReturn(mockAlbum);
 
         PhotoRepository photoRepositoryMock = mock(PhotoRepository.class);
-        when(photoRepositoryMock.save(Mockito.any(Photo.class))).thenReturn(new Photo());
+        when(photoRepositoryMock.save(any(Photo.class))).thenReturn(new Photo());
 
         AlbumService albumService = new AlbumService(albumRepositoryMock, photoRepositoryMock);
 
@@ -123,4 +122,18 @@ class AlbumServiceTest {
         assertEquals("테스트 1앨범", resultName.get(0).getAlbumName());
         assertEquals("테스트 2앨범", resultName.get(1).getAlbumName());
     }
+
+    @Test
+    public void deleteAlbum() {
+        String albumName = "테스트앨범";
+
+        Album mockAlbum = Album.builder()
+                .albumName(albumName)
+                .build();
+
+        albumRepository.save(mockAlbum);
+        albumService.deleteAlbum(mockAlbum.getAlbumId());
+        assertFalse(albumRepository.existsById(mockAlbum.getAlbumId()));
+    }
+
 }
