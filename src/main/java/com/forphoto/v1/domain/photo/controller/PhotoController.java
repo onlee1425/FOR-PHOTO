@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/albums/{albumId}/photos")
+@RequestMapping("/api/albums/{albumId}/photos")
 @Api(tags = "Photo API")
 public class PhotoController {
 
@@ -31,5 +31,12 @@ public class PhotoController {
             photos.add(photoDto);
         }
         return new ResponseEntity<>(photos, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "사진 상세정보를 조회한다.")
+    @GetMapping(value = "/{photoId}")
+    public ResponseEntity<PhotoDto> getPhotoInfo(@PathVariable("photoId") final Long photoId) {
+            PhotoDto photoDto = photoService.getPhotoInfo(photoId);
+            return new ResponseEntity<>(photoDto,HttpStatus.OK);
     }
 }

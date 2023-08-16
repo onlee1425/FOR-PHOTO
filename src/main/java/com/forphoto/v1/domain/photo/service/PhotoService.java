@@ -100,4 +100,27 @@ public class PhotoService {
             throw new RuntimeException("Could not store the file. Error : " + e.getMessage());
         }
     }
+
+    //todo : 이미지 파일 검증 기능
+
+    public PhotoDto getPhotoInfo(Long photoId){
+        Optional<Photo> result = photoRepository.findById(photoId);
+
+        if (result.isPresent()){
+            Photo photo = result.get();
+            PhotoDto response = new PhotoDto();
+            response.setPhotoId(photo.getPhotoId());
+            response.setAlbumId(photo.getAlbum().getAlbumId());
+            response.setFileName(photo.getFileName());
+            response.setOriginalUrl(photo.getOriginalUrl());
+            response.setThumbUrl(photo.getThumbUrl());
+            response.setUploadedAt(photo.getUploadedAt());
+            response.setFileSize((int) photo.getFileSize());
+
+            return response;
+        } else {
+            throw new RuntimeException("조회되는 사진이 없습니다.");
+        }
+
+    }
 }
