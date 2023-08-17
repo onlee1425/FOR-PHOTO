@@ -1,5 +1,6 @@
 package com.forphoto.v1.domain.photo.controller;
 
+import com.forphoto.v1.domain.photo.dto.DeletePhotoResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.service.PhotoService;
 import io.swagger.annotations.Api;
@@ -36,7 +37,23 @@ public class PhotoController {
     @ApiOperation(value = "사진 상세정보를 조회한다.")
     @GetMapping(value = "/{photoId}")
     public ResponseEntity<PhotoDto> getPhotoInfo(@PathVariable("photoId") final Long photoId) {
-            PhotoDto photoDto = photoService.getPhotoInfo(photoId);
-            return new ResponseEntity<>(photoDto,HttpStatus.OK);
+
+        PhotoDto photoDto = photoService.getPhotoInfo(photoId);
+        return new ResponseEntity<>(photoDto, HttpStatus.OK);
+
+    }
+
+    @ApiOperation(value = "사진을 삭제한다.")
+    @DeleteMapping
+    public ResponseEntity<List<DeletePhotoResponse>> deletePhotos(@RequestBody List<Long> photoIds) {
+
+        List<DeletePhotoResponse> responses = new ArrayList<>();
+
+        for (Long photoId : photoIds) {
+            DeletePhotoResponse result = photoService.deletePhoto(photoId);
+            responses.add(result);
+        }
+
+        return ResponseEntity.ok(responses);
     }
 }

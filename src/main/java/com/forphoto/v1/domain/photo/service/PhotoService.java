@@ -3,6 +3,7 @@ package com.forphoto.v1.domain.photo.service;
 import com.forphoto.v1.common.Constants;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
+import com.forphoto.v1.domain.photo.dto.DeletePhotoResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
@@ -17,9 +18,11 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,15 +34,15 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final AlbumRepository albumRepository;
 
-    public PhotoDto savePhoto (MultipartFile file, Long albumId) {
+    public PhotoDto savePhoto(MultipartFile file, Long albumId) {
         Optional<Album> res = albumRepository.findById(albumId);
 
-        if(res.isEmpty()){
+        if (res.isEmpty()) {
             throw new EntityNotFoundException("앨범이 존재하지 않습니다");
         }
 
         String fileName = file.getOriginalFilename();
-        int fileSize = (int)file.getSize();
+        int fileSize = (int) file.getSize();
         fileName = checkFileName(fileName, albumId);
         saveFile(file, albumId, fileName);
 
@@ -103,10 +106,10 @@ public class PhotoService {
 
     //todo : 이미지 파일 검증 기능
 
-    public PhotoDto getPhotoInfo(Long photoId){
+    public PhotoDto getPhotoInfo(Long photoId) {
         Optional<Photo> result = photoRepository.findById(photoId);
 
-        if (result.isPresent()){
+        if (result.isPresent()) {
             Photo photo = result.get();
             PhotoDto response = new PhotoDto();
             response.setPhotoId(photo.getPhotoId());
@@ -122,5 +125,37 @@ public class PhotoService {
             throw new RuntimeException("조회되는 사진이 없습니다.");
         }
 
+    }
+
+    public DeletePhotoResponse deletePhoto(Long photoId) {
+        Optional<Photo> photoOptional = photoRepository.findById(photoId);
+
+        if (photoOptional.isEmpty()) {
+            throw new RuntimeException("해당하는 사진이 없습니다.");
+        }
+
+        Photo photo = photoOptional.get();
+
+        String albumId = String.valueOf(photo.getAlbum().getAlbumId());
+        String fileName = photo.getFileName();
+        String originFilePath = Constants.PATH_PREFIX + "/photos/original/" + albumId + "/" + fileName;
+        String thumbFilePath = Constants.PATH_PREFIX + "/photos/thumb/" + albumId + "/" + fileName;
+
+        try {
+            Files.deleteIfExists(Paths.get(originFilePath));
+            Files.deleteIfExists(Paths.get(thumbFilePath));
+        } catch (IOException e) {
+            throw new RuntimeException("파일 삭제 중 오류가 발생했습니다.");
+        }
+
+        DeletePhotoResponse response = new DeletePhotoResponse();
+        response.setPhotoId(photo.getPhotoId());
+        response.setFileName(photo.getFileName());
+        response.setThumbUrl(photo.getThumbUrl());
+        response.setUploadedAt(photo.getUploadedAt());
+
+        photoRepository.delete(photo);
+
+        return response;
     }
 }
