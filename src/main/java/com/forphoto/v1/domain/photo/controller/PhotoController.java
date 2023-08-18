@@ -1,6 +1,8 @@
 package com.forphoto.v1.domain.photo.controller;
 
 import com.forphoto.v1.domain.photo.dto.DeletePhotoResponse;
+import com.forphoto.v1.domain.photo.dto.MovePhotosRequest;
+import com.forphoto.v1.domain.photo.dto.MovePhotosResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.service.PhotoService;
 import io.swagger.annotations.Api;
@@ -56,4 +58,14 @@ public class PhotoController {
 
         return ResponseEntity.ok(responses);
     }
+
+    @ApiOperation(value = "선택한 사진을 다른 앨범으로 옮긴다.")
+    @PutMapping("/move")
+    public ResponseEntity<List<MovePhotosResponse>> movePhotos(@RequestBody MovePhotosRequest request){
+
+        List<MovePhotosResponse> responses = photoService.movePhotos(request);
+        return ResponseEntity.ok(responses);
+
+    }
+
 }

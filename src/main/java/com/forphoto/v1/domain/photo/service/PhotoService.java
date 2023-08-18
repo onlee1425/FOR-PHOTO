@@ -4,6 +4,8 @@ import com.forphoto.v1.common.Constants;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
 import com.forphoto.v1.domain.photo.dto.DeletePhotoResponse;
+import com.forphoto.v1.domain.photo.dto.MovePhotosRequest;
+import com.forphoto.v1.domain.photo.dto.MovePhotosResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -158,4 +161,41 @@ public class PhotoService {
 
         return response;
     }
+
+    public List<MovePhotosResponse> movePhotos(MovePhotosRequest request) {
+        List<MovePhotosResponse> responses = new ArrayList<>();
+
+        Long toAlbumId = request.getToAlbumId();
+
+        for (Long photoId : request.getPhotoIds()) {
+            Optional<Photo> photoOptional = photoRepository.findById(photoId);
+
+            if (photoOptional.isPresent()) {
+                Photo photo = photoOptional.get();
+
+                Album newAlbum = albumRepository.findById(toAlbumId).orElseThrow(() ->
+                        new EntityNotFoundException("앨범이 존재하지 않습니다"));
+
+                photo.setAlbum(newAlbum);
+                photoRepository.save(photo);
+
+                MovePhotosResponse photosResponse = new MovePhotosResponse();
+                photosResponse.setPhotoId(photoId);
+                photosResponse.setFileName(photo.getFileName());
+                photosResponse.setThumbUrl(photo.getThumbUrl());
+                photosResponse.setUploadedAt(photo.getUploadedAt());
+
+                responses.add(photosResponse);
+
+                Album fromAlbum = photo.getAlbum();
+                fromAlbum.getPhotos().remove(photo);
+
+            } else {
+                throw new EntityNotFoundException("앨범이 존재하지 않습니다.");
+            }
+        }
+
+        return responses;
+    }
+    //TODO 앨범 이동시 파일이동처리
 }
