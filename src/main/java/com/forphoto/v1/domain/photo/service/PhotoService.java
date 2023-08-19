@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -165,6 +166,7 @@ public class PhotoService {
     public List<MovePhotosResponse> movePhotos(MovePhotosRequest request) {
         List<MovePhotosResponse> responses = new ArrayList<>();
 
+        Long fromAlbumId = request.getFromAlbumId();
         Long toAlbumId = request.getToAlbumId();
 
         for (Long photoId : request.getPhotoIds()) {
@@ -173,10 +175,12 @@ public class PhotoService {
             if (photoOptional.isPresent()) {
                 Photo photo = photoOptional.get();
 
-                Album newAlbum = albumRepository.findById(toAlbumId).orElseThrow(() ->
-                        new EntityNotFoundException("앨범이 존재하지 않습니다"));
+                Album toAlbum = albumRepository.findById(toAlbumId).orElseThrow(() ->
+                        new EntityNotFoundException("사진을 옮기려는 앨범이 존재하지 않습니다"));
 
-                photo.setAlbum(newAlbum);
+                moveFile(fromAlbumId,toAlbumId, photo.getFileName());
+
+                photo.setAlbum(toAlbum);
                 photoRepository.save(photo);
 
                 MovePhotosResponse photosResponse = new MovePhotosResponse();
@@ -191,11 +195,30 @@ public class PhotoService {
                 fromAlbum.getPhotos().remove(photo);
 
             } else {
-                throw new EntityNotFoundException("앨범이 존재하지 않습니다.");
+                throw new EntityNotFoundException("원본 앨범이 존재하지 않습니다.");
             }
         }
 
         return responses;
     }
-    //TODO 앨범 이동시 파일이동처리
+
+    private void moveFile(Long fromAlbumId, Long toAlbumId, String fileName) {
+        try {
+            String fromOriginalFilePath = Constants.PATH_PREFIX + "/photos/original/" + fromAlbumId + "/" + fileName;
+            String fromThumbFilePath = Constants.PATH_PREFIX + "/photos/thumb/" + fromAlbumId + "/" + fileName;
+
+            String toOriginalFilePath = Constants.PATH_PREFIX + "/photos/original/" + toAlbumId + "/" + fileName;
+            String toThumbFilePath = Constants.PATH_PREFIX + "/photos/thumb/" + toAlbumId + "/" + fileName;
+
+            Files.createDirectories(Paths.get(Constants.PATH_PREFIX + "/photos/original/" + toAlbumId));
+            Files.createDirectories(Paths.get(Constants.PATH_PREFIX + "/photos/thumb/" + toAlbumId));
+
+            Files.move(Paths.get(fromOriginalFilePath), Paths.get(toOriginalFilePath), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Paths.get(fromThumbFilePath), Paths.get(toThumbFilePath), StandardCopyOption.REPLACE_EXISTING);
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 이동 중 오류가 발생했습니다. : " + e.getMessage());
+        }
+    }
+
 }
