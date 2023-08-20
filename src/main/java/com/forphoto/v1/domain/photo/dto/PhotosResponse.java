@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class MovePhotosResponse {
+public class PhotosResponse {
 
     private Long photoId;
     private String fileName;

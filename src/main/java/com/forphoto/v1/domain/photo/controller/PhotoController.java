@@ -1,8 +1,7 @@
 package com.forphoto.v1.domain.photo.controller;
 
-import com.forphoto.v1.domain.photo.dto.DeletePhotoResponse;
 import com.forphoto.v1.domain.photo.dto.MovePhotosRequest;
-import com.forphoto.v1.domain.photo.dto.MovePhotosResponse;
+import com.forphoto.v1.domain.photo.dto.PhotosResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.service.PhotoService;
 import io.swagger.annotations.Api;
@@ -47,12 +46,12 @@ public class PhotoController {
 
     @ApiOperation(value = "사진을 삭제한다.")
     @DeleteMapping
-    public ResponseEntity<List<DeletePhotoResponse>> deletePhotos(@RequestBody List<Long> photoIds) {
+    public ResponseEntity<List<PhotosResponse>> deletePhotos(@RequestBody List<Long> photoIds) {
 
-        List<DeletePhotoResponse> responses = new ArrayList<>();
+        List<PhotosResponse> responses = new ArrayList<>();
 
         for (Long photoId : photoIds) {
-            DeletePhotoResponse result = photoService.deletePhoto(photoId);
+            PhotosResponse result = photoService.deletePhoto(photoId);
             responses.add(result);
         }
 
@@ -61,11 +60,21 @@ public class PhotoController {
 
     @ApiOperation(value = "선택한 사진을 다른 앨범으로 옮긴다.")
     @PutMapping("/move")
-    public ResponseEntity<List<MovePhotosResponse>> movePhotos(@RequestBody MovePhotosRequest request){
+    public ResponseEntity<List<PhotosResponse>> movePhotos(@RequestBody MovePhotosRequest request) {
 
-        List<MovePhotosResponse> responses = photoService.movePhotos(request);
+        List<PhotosResponse> responses = photoService.movePhotos(request);
         return ResponseEntity.ok(responses);
 
+    }
+
+    @ApiOperation(value = "앨범에 있는 사진 목록을 조회한다.")
+    @GetMapping
+    public ResponseEntity<List<PhotosResponse>> getPhotos(@RequestParam(value = "keyword", required = false, defaultValue = "") final String keyword,
+                                                          @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort,
+                                                          @PathVariable Long albumId) {
+
+        List<PhotosResponse> photoList = photoService.getPhotoList(keyword,sort,albumId);
+        return new ResponseEntity<>(photoList,HttpStatus.OK);
     }
 
 }

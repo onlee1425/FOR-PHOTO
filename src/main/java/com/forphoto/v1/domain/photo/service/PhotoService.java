@@ -3,9 +3,8 @@ package com.forphoto.v1.domain.photo.service;
 import com.forphoto.v1.common.Constants;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
-import com.forphoto.v1.domain.photo.dto.DeletePhotoResponse;
 import com.forphoto.v1.domain.photo.dto.MovePhotosRequest;
-import com.forphoto.v1.domain.photo.dto.MovePhotosResponse;
+import com.forphoto.v1.domain.photo.dto.PhotosResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
@@ -131,7 +130,7 @@ public class PhotoService {
 
     }
 
-    public DeletePhotoResponse deletePhoto(Long photoId) {
+    public PhotosResponse deletePhoto(Long photoId) {
         Optional<Photo> photoOptional = photoRepository.findById(photoId);
 
         if (photoOptional.isEmpty()) {
@@ -152,7 +151,7 @@ public class PhotoService {
             throw new RuntimeException("파일 삭제 중 오류가 발생했습니다.");
         }
 
-        DeletePhotoResponse response = new DeletePhotoResponse();
+        PhotosResponse response = new PhotosResponse();
         response.setPhotoId(photo.getPhotoId());
         response.setFileName(photo.getFileName());
         response.setThumbUrl(photo.getThumbUrl());
@@ -163,8 +162,8 @@ public class PhotoService {
         return response;
     }
 
-    public List<MovePhotosResponse> movePhotos(MovePhotosRequest request) {
-        List<MovePhotosResponse> responses = new ArrayList<>();
+    public List<PhotosResponse> movePhotos(MovePhotosRequest request) {
+        List<PhotosResponse> responses = new ArrayList<>();
 
         Long fromAlbumId = request.getFromAlbumId();
         Long toAlbumId = request.getToAlbumId();
@@ -178,12 +177,12 @@ public class PhotoService {
                 Album toAlbum = albumRepository.findById(toAlbumId).orElseThrow(() ->
                         new EntityNotFoundException("사진을 옮기려는 앨범이 존재하지 않습니다"));
 
-                moveFile(fromAlbumId,toAlbumId, photo.getFileName());
+                moveFile(fromAlbumId, toAlbumId, photo.getFileName());
 
                 photo.setAlbum(toAlbum);
                 photoRepository.save(photo);
 
-                MovePhotosResponse photosResponse = new MovePhotosResponse();
+                PhotosResponse photosResponse = new PhotosResponse();
                 photosResponse.setPhotoId(photoId);
                 photosResponse.setFileName(photo.getFileName());
                 photosResponse.setThumbUrl(photo.getThumbUrl());
@@ -221,4 +220,31 @@ public class PhotoService {
         }
     }
 
+    public List<PhotosResponse> getPhotoList(String keyword, String sort, Long albumId) {
+        Optional<Album> albumOptional = albumRepository.findById(albumId);
+        if (albumOptional.isEmpty()) {
+            throw new EntityNotFoundException("앨범이 존재하지 않습니다.");
+        }
+        List<Photo> photos;
+        if (Objects.equals(sort, "byName")) {
+            photos = photoRepository.findByFileNameContainingAndAlbum_AlbumIdOrderByFileNameAsc(keyword, albumId);
+        } else if (Objects.equals(sort, "byDate")) {
+            photos = photoRepository.findByFileNameContainingAndAlbum_AlbumIdOrderByUploadedAt(keyword, albumId);
+        } else {
+            throw new IllegalArgumentException("알 수 없는 정렬 기준입니다.");
+        }
+
+        List<PhotosResponse> responses = new ArrayList<>();
+        for (Photo photo : photos) {
+            PhotosResponse res = new PhotosResponse();
+            res.setPhotoId(photo.getPhotoId());
+            res.setFileName(photo.getFileName());
+            res.setThumbUrl(photo.getThumbUrl());
+            res.setUploadedAt(photo.getUploadedAt());
+
+            responses.add(res);
+        }
+
+        return responses;
+    }
 }

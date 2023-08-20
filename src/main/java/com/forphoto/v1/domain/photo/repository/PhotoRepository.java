@@ -16,4 +16,8 @@ public interface PhotoRepository extends JpaRepository<Photo,Long> {
 
     Optional<Photo> findByFileNameAndAlbum_AlbumId(String photoName, Long albumId);
 
+    List<Photo> findByFileNameContainingAndAlbum_AlbumIdOrderByFileNameAsc(String keyword,Long albumId);
+
+    List<Photo> findByFileNameContainingAndAlbum_AlbumIdOrderByUploadedAt(String keyword,Long albumId);
+
 }
