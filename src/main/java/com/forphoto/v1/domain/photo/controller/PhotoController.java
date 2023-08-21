@@ -7,11 +7,15 @@ import com.forphoto.v1.domain.photo.service.PhotoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,6 +79,20 @@ public class PhotoController {
 
         List<PhotosResponse> photoList = photoService.getPhotoList(keyword,sort,albumId);
         return new ResponseEntity<>(photoList,HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "사진을 다운로드 한다.")
+    @GetMapping("/download")
+    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response){
+        try {
+            if (photoIds.length == 1){
+                File file = photoService.getImageFile(photoIds[0]);
+                OutputStream outputStream = response.getOutputStream();
+                IOUtils.copy(new FileInputStream(file),outputStream);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
