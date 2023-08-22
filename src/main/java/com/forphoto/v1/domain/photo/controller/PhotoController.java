@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,18 +78,32 @@ public class PhotoController {
                                                           @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort,
                                                           @PathVariable Long albumId) {
 
-        List<PhotosResponse> photoList = photoService.getPhotoList(keyword,sort,albumId);
-        return new ResponseEntity<>(photoList,HttpStatus.OK);
+        List<PhotosResponse> photoList = photoService.getPhotoList(keyword, sort, albumId);
+        return new ResponseEntity<>(photoList, HttpStatus.OK);
     }
 
     @ApiOperation(value = "사진을 다운로드 한다.")
     @GetMapping("/download")
-    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response){
+    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response) {
         try {
-            if (photoIds.length == 1){
+            if (photoIds.length == 1) {
                 File file = photoService.getImageFile(photoIds[0]);
                 OutputStream outputStream = response.getOutputStream();
-                IOUtils.copy(new FileInputStream(file),outputStream);
+                IOUtils.copy(new FileInputStream(file), outputStream);
+            } else if (photoIds.length > 1) {
+                File zipFile = photoService.getImageFilesWithZip(photoIds);
+                response.setContentType(MediaType.APPLICATION_OCTET_STREAM.toString());
+                response.setHeader("Content-Disposition", "attachment; filename=photos.zip");
+
+                try (InputStream is = new FileInputStream(zipFile);
+                     OutputStream os = response.getOutputStream()) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                }
+                zipFile.delete();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

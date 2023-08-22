@@ -10,6 +10,7 @@ import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -19,6 +20,8 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -248,11 +253,45 @@ public class PhotoService {
         return responses;
     }
 
-    public File getImageFile(Long photoId){
+    public File getImageFile(Long photoId) {
         Optional<Photo> photo = photoRepository.findById(photoId);
-        if (photo.isEmpty()){
+        if (photo.isEmpty()) {
             throw new EntityNotFoundException("사진 ID %d 를 찾을 수 없습니다.");
         }
         return new File(Constants.PATH_PREFIX + photo.get().getOriginalUrl());
+    }
+
+    public File getImageFilesWithZip(Long[] photoIds) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ZipOutputStream zipOut = new ZipOutputStream(baos);
+
+            for (Long photoId : photoIds) {
+                File file = getImageFile(photoId);
+                FileInputStream fis = new FileInputStream(file);
+                ZipEntry zipEntry = new ZipEntry(file.getName());
+                zipOut.putNextEntry(zipEntry);
+
+                byte[] bytes = new byte[1024];
+                int length;
+                while ((length = fis.read(bytes)) >= 0) {
+                    zipOut.write(bytes, 0, length);
+                }
+
+                fis.close();
+                zipOut.closeEntry();
+            }
+
+            zipOut.close();
+
+            File zipFile = new File("photos.zip");
+            try (FileOutputStream fos = new FileOutputStream(zipFile)) {
+                baos.writeTo(fos);
+            }
+
+            return zipFile;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
