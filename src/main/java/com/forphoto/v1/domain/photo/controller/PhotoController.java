@@ -1,8 +1,8 @@
 package com.forphoto.v1.domain.photo.controller;
 
 import com.forphoto.v1.domain.photo.dto.MovePhotosRequest;
-import com.forphoto.v1.domain.photo.dto.PhotosResponse;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
+import com.forphoto.v1.domain.photo.dto.PhotosResponse;
 import com.forphoto.v1.domain.photo.service.PhotoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,14 +83,15 @@ public class PhotoController {
 
     @ApiOperation(value = "사진을 다운로드 한다.")
     @GetMapping("/download")
-    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response) {
+    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response, @PathVariable Long albumId) {
         try {
             if (photoIds.length == 1) {
-                File file = photoService.getImageFile(photoIds[0]);
+                File file = photoService.getImageFile(photoIds[0],albumId);
                 OutputStream outputStream = response.getOutputStream();
                 IOUtils.copy(new FileInputStream(file), outputStream);
+
             } else if (photoIds.length > 1) {
-                File zipFile = photoService.getImageFilesWithZip(photoIds);
+                File zipFile = photoService.getImageFilesWithZip(photoIds,albumId);
                 response.setContentType(MediaType.APPLICATION_OCTET_STREAM.toString());
                 response.setHeader("Content-Disposition", "attachment; filename=photos.zip");
 

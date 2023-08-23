@@ -253,40 +253,45 @@ public class PhotoService {
         return responses;
     }
 
-    public File getImageFile(Long photoId) {
+    public File getImageFile(Long photoId,Long albumId) {
+        Optional<Album> album = albumRepository.findById(albumId);
         Optional<Photo> photo = photoRepository.findById(photoId);
+
         if (photo.isEmpty()) {
-            throw new EntityNotFoundException("사진 ID %d 를 찾을 수 없습니다.");
+            throw new EntityNotFoundException("사진 ID : %d 를 찾을 수 없습니다.");
+        }
+        if (album.isEmpty() || !album.get().getPhotos().contains(photo.get())){
+            throw new EntityNotFoundException("앨범 ID : %d 에 해당하는 앨범이 없거나, 해당하는 사진이 앨범에 속해있지 않습니다.");
         }
         return new File(Constants.PATH_PREFIX + photo.get().getOriginalUrl());
     }
 
-    public File getImageFilesWithZip(Long[] photoIds) {
+    public File getImageFilesWithZip(Long[] photoIds,Long albumId) {
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ZipOutputStream zipOut = new ZipOutputStream(baos);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
             for (Long photoId : photoIds) {
-                File file = getImageFile(photoId);
-                FileInputStream fis = new FileInputStream(file);
+                File file = getImageFile(photoId,albumId);
+                FileInputStream fileInputStream = new FileInputStream(file);
                 ZipEntry zipEntry = new ZipEntry(file.getName());
-                zipOut.putNextEntry(zipEntry);
+                zipOutputStream.putNextEntry(zipEntry);
 
                 byte[] bytes = new byte[1024];
                 int length;
-                while ((length = fis.read(bytes)) >= 0) {
-                    zipOut.write(bytes, 0, length);
+                while ((length = fileInputStream.read(bytes)) >= 0) {
+                    zipOutputStream.write(bytes, 0, length);
                 }
 
-                fis.close();
-                zipOut.closeEntry();
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
             }
 
-            zipOut.close();
+            zipOutputStream.close();
 
             File zipFile = new File("photos.zip");
             try (FileOutputStream fos = new FileOutputStream(zipFile)) {
-                baos.writeTo(fos);
+                byteArrayOutputStream.writeTo(fos);
             }
 
             return zipFile;
