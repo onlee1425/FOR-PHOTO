@@ -43,6 +43,16 @@ public class PhotoService {
     private final AlbumRepository albumRepository;
 
     public PhotoDto savePhoto(MultipartFile file, Long albumId) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null){
+            throw new IllegalArgumentException("파일 이름을 확인할 수 없습니다.");
+        }
+
+        String fileExt = checkFileExtension(file.getOriginalFilename());
+        if (!validImageExtension(fileExt)){
+            throw new IllegalArgumentException("유효한 이미지 파일이 아닙니다.");
+        }
+
         Optional<Album> res = albumRepository.findById(albumId);
 
         if (res.isEmpty()) {
@@ -90,6 +100,18 @@ public class PhotoService {
         return fileName;
     }
 
+    private String checkFileExtension(String fileName){
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1){
+            return fileName.substring(dotIndex + 1).toLowerCase();
+        }
+        return "";
+    }
+
+    private boolean validImageExtension(String extension){
+        return extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png") || extension.equals("gif");
+    }
+
     private void saveFile(MultipartFile file, Long albumId, String fileName) {
         try {
             String filePath = albumId + "/" + fileName;
@@ -111,8 +133,6 @@ public class PhotoService {
             throw new RuntimeException("Could not store the file. Error : " + e.getMessage());
         }
     }
-
-    //todo : 이미지 파일 검증 기능
 
     public PhotoDto getPhotoInfo(Long photoId) {
         Optional<Photo> result = photoRepository.findById(photoId);
