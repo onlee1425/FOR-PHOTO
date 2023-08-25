@@ -1,6 +1,7 @@
 package com.forphoto.v1.domain.album.entity;
 
 import com.forphoto.v1.domain.photo.entity.Photo;
+import com.forphoto.v1.domain.member.entity.Member;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -29,6 +30,10 @@ public class Album {
     @Column(name = "created_at")
     @CreationTimestamp
     private Date createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     public void setAlbumName(String albumName) {
         this.albumName = albumName;
