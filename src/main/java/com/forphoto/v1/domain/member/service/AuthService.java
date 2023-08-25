@@ -1,10 +1,10 @@
-package com.forphoto.v1.domain.user.service;
+package com.forphoto.v1.domain.member.service;
 
-import com.forphoto.v1.domain.user.dto.LoginRequest;
-import com.forphoto.v1.domain.user.dto.LoginResponse;
-import com.forphoto.v1.domain.user.dto.RegisterRequest;
-import com.forphoto.v1.domain.user.entity.User;
-import com.forphoto.v1.domain.user.repository.UserRepository;
+import com.forphoto.v1.domain.member.dto.LoginRequest;
+import com.forphoto.v1.domain.member.dto.LoginResponse;
+import com.forphoto.v1.domain.member.dto.RegisterRequest;
+import com.forphoto.v1.domain.member.entity.Member;
+import com.forphoto.v1.domain.member.repository.MemberRepository;
 import com.forphoto.v1.security.jwt.JwtToken;
 import com.forphoto.v1.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -23,34 +23,34 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate<String,String> redis;
 
-    public User register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+    public Member register(RegisterRequest request) {
+        if (memberRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException();
         }
 
-        User user = User.builder()
+        Member member = Member.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .build();
 
-        return userRepository.save(user);
+        return memberRepository.save(member);
     }
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(()->new RuntimeException("해당하는 회원이 없습니다."));
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())){
             throw new RuntimeException("올바르지 않은 비밀번호 입니다.");
         }
 
-        JwtToken token = jwtTokenProvider.generateToken(user.getUserId());
-        redis.opsForValue().set("userId : " +user.getUserId(),"Bearer "+token.getRefreshToken(),
+        JwtToken token = jwtTokenProvider.generateToken(member.getMemberId());
+        redis.opsForValue().set("userId : " + member.getMemberId(),"Bearer "+token.getRefreshToken(),
                 token.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
         HttpHeaders headers = new HttpHeaders();

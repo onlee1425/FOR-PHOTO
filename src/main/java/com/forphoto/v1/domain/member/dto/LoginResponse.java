@@ -1,4 +1,4 @@
-package com.forphoto.v1.domain.user.dto;
+package com.forphoto.v1.domain.member.dto;
 
 import org.springframework.http.HttpHeaders;
 

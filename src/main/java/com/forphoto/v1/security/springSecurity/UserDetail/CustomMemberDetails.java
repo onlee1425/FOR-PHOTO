@@ -1,6 +1,6 @@
 package com.forphoto.v1.security.springSecurity.UserDetail;
 
-import com.forphoto.v1.domain.user.entity.User;
+import com.forphoto.v1.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -9,9 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 @RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+public class CustomMemberDetails implements UserDetails {
 
-    private final User user;
+    private final Member member;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -20,12 +20,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return member.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return member.getName();
     }
 
     @Override

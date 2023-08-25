@@ -1,7 +1,7 @@
 package com.forphoto.v1.security.springSecurity.UserDetail;
 
-import com.forphoto.v1.domain.user.entity.User;
-import com.forphoto.v1.domain.user.repository.UserRepository;
+import com.forphoto.v1.domain.member.entity.Member;
+import com.forphoto.v1.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,15 +10,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailService implements UserDetailsService {
+public class CustomMemberDetailService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findById(Long.parseLong(username))
+        Member member = memberRepository.findById(Long.parseLong(username))
                 .orElseThrow(()->new RuntimeException());
 
-        return new CustomUserDetails(user);
+        return new CustomMemberDetails(member);
     }
 }

@@ -1,5 +1,6 @@
-package com.forphoto.v1.domain.user.entity;
+package com.forphoto.v1.domain.member.entity;
 
+import com.forphoto.v1.domain.album.entity.Album;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,19 +8,21 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", unique = true, nullable = false)
-    private long userId;
+    @Column(name = "member_id", unique = true, nullable = false)
+    private long memberId;
 
     private String name;
 
@@ -34,6 +37,9 @@ public class User {
     @Column(name = "login_At")
     @CreationTimestamp
     private Date loginAt;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Album> albums = new ArrayList<>();
 
 
 }
