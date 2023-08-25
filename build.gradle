@@ -58,6 +58,9 @@ dependencies {
 	// ThumbNail
 	implementation 'org.imgscalr:imgscalr-lib:4.2'
 
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 }
 
 tasks.named('test') {
