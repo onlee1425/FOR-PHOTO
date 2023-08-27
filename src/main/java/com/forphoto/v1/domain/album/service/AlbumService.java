@@ -7,6 +7,8 @@ import com.forphoto.v1.domain.album.dto.CreateAlbumResponse;
 import com.forphoto.v1.domain.album.dto.UpdateAlbumNameResponse;
 import com.forphoto.v1.domain.album.entity.Album;
 import com.forphoto.v1.domain.album.repository.AlbumRepository;
+import com.forphoto.v1.domain.member.entity.Member;
+import com.forphoto.v1.domain.member.repository.MemberRepository;
 import com.forphoto.v1.domain.photo.entity.Photo;
 import com.forphoto.v1.domain.photo.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +25,14 @@ public class AlbumService {
 
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
+    private final MemberRepository memberRepository;
 
-    public AlbumInfoResponse getAlbum(Long albumId) {
-        Optional<Album> result = albumRepository.findById(albumId);
+    public AlbumInfoResponse getAlbum(Long albumId,Long memberId) {
+        Long albumMemberId = albumRepository.findMemberIdByAlbumId(albumId);
 
-        if (result.isPresent()) {
-            Album album = result.get();
+        if (albumMemberId != null && albumMemberId.equals(memberId)) {
+            Album album = albumRepository.findById(albumId).orElseThrow(() -> new EntityNotFoundException("앨범이 조회되지 않았습니다"));
+
             AlbumInfoResponse response = new AlbumInfoResponse();
             response.setAlbumId(album.getAlbumId());
             response.setAlbumName(album.getAlbumName());
@@ -37,19 +41,23 @@ public class AlbumService {
 
             return response;
         } else {
-            throw new EntityNotFoundException(String.format("앨범 아이디 %d로 조회되지 않았습니다", albumId));
+            throw new IllegalArgumentException("앨범이 해당 멤버의 것이 아닙니다");
         }
     }
 
-    public CreateAlbumResponse createAlbum(String albumName) {
+    public CreateAlbumResponse createAlbum(String albumName,Long memberId) {
         List<Album> existAlbumName = albumRepository.findByAlbumName(albumName);
         if (!existAlbumName.isEmpty()) {
             throw new IllegalArgumentException("중복된 앨범명입니다.");
         }
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("멤버를 찾을 수 없습니다"));
+
         Album album = Album.builder()
                 .albumName(albumName)
                 .createdAt(new Date())
+                .member(member)
                 .build();
 
         Album createdAlbum = albumRepository.save(album);
