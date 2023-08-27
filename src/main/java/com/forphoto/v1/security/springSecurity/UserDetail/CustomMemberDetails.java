@@ -25,7 +25,7 @@ public class CustomMemberDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return member.getName();
+        return String.valueOf(member.getMemberId());
     }
 
     @Override
@@ -46,5 +46,9 @@ public class CustomMemberDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return false;
+    }
+
+    public Long getMemberId() {
+        return Long.valueOf(getUsername());
     }
 }
