@@ -4,6 +4,7 @@ import com.forphoto.v1.domain.member.dto.LoginRequest;
 import com.forphoto.v1.domain.member.dto.LoginResponse;
 import com.forphoto.v1.domain.member.dto.RegisterRequest;
 import com.forphoto.v1.domain.member.entity.Member;
+import com.forphoto.v1.domain.member.model.MemberRole;
 import com.forphoto.v1.domain.member.repository.MemberRepository;
 import com.forphoto.v1.security.jwt.JwtToken;
 import com.forphoto.v1.security.jwt.JwtTokenProvider;
@@ -37,6 +38,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
+                .memberRole(MemberRole.MEMBER)
                 .build();
 
         return memberRepository.save(member);

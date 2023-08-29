@@ -1,6 +1,7 @@
 package com.forphoto.v1.domain.member.entity;
 
 import com.forphoto.v1.domain.album.entity.Album;
+import com.forphoto.v1.domain.member.model.MemberRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +38,9 @@ public class Member {
     @Column(name = "login_At")
     @CreationTimestamp
     private Date loginAt;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole memberRole;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Album> albums = new ArrayList<>();
