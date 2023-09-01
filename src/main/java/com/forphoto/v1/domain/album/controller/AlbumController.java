@@ -48,9 +48,10 @@ public class AlbumController {
     @ApiOperation(value = "앨범 목록 조회", notes = "생성된 앨범의 목록을 조회한다.")
     @GetMapping
     public ResponseEntity<List<AlbumListResponse>> getAlbumList(@RequestParam(value = "keyword", required = false, defaultValue = "") final String keyword,
-                                                                @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort) {
+                                                                @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort,
+                                                                @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
 
-        List<AlbumListResponse> AlbumList = albumService.getAlbumList(keyword, sort);
+        List<AlbumListResponse> AlbumList = albumService.getAlbumList(keyword, sort,memberDetails.getMemberId());
 
         return new ResponseEntity<>(AlbumList, HttpStatus.OK);
 

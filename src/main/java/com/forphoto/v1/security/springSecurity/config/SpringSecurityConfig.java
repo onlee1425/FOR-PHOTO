@@ -45,7 +45,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     public static final String[] PERMIT_GET_API_ARRAY = {
-            "/api/albums","/api/albums/{albumId}/photos","/api/albums/{albumId}/photos/**"
+            "/api/albums/{albumId}/photos","/api/albums/{albumId}/photos/**"
     };
 
     @Override

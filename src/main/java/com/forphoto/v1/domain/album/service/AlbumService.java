@@ -71,14 +71,16 @@ public class AlbumService {
         return response;
     }
 
-    public List<AlbumListResponse> getAlbumList(String keyword, String sort) {
+    public List<AlbumListResponse> getAlbumList(String keyword, String sort,Long id) {
         List<Album> albums;
+        albums = albumRepository.findByMemberId(id);
+
         log.info("키워드 = " + keyword);
         log.info("정렬 = " + sort);
         if (Objects.equals(sort, "byName")) {
-            albums = albumRepository.findByAlbumNameContainingOrderByAlbumNameAsc(keyword);
+            albums.sort(Comparator.comparing(Album::getAlbumName)); //오름차순
         } else if (Objects.equals(sort, "byDate")) {
-            albums = albumRepository.findByAlbumNameContainingOrderByCreatedAtDesc(keyword);
+            albums.sort(Comparator.comparing(Album::getCreatedAt).reversed()); //내림차순
         } else {
             throw new IllegalArgumentException("알 수 없는 정렬 기준입니다");
         }
