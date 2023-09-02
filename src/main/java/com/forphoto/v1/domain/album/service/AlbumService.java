@@ -46,8 +46,8 @@ public class AlbumService {
     }
 
     public CreateAlbumResponse createAlbum(String albumName,Long memberId) {
-        List<Album> existAlbumName = albumRepository.findByAlbumName(albumName);
-        if (!existAlbumName.isEmpty()) {
+        List<Album> existAlbumName = albumRepository.findByMemberId(memberId);
+        if (existAlbumName.stream().anyMatch(album -> album.getAlbumName().equals(albumName))) {
             throw new IllegalArgumentException("중복된 앨범명입니다.");
         }
 

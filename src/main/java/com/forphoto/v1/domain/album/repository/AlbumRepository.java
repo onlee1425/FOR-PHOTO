@@ -10,7 +10,6 @@ import java.util.List;
 
 @Repository
 public interface AlbumRepository extends JpaRepository<Album,Long> {
-    List<Album> findByAlbumName(String name);
     Long findMemberIdByAlbumId(Long albumId);
     @Query("SELECT a FROM Album a WHERE a.member.memberId = :memberId")
     List<Album> findByMemberId(@Param("memberId") Long memberId);
