@@ -28,10 +28,10 @@ public class AlbumService {
     private final MemberRepository memberRepository;
 
     public AlbumInfoResponse getAlbum(Long albumId,Long memberId) {
-        Long albumMemberId = albumRepository.findMemberIdByAlbumId(albumId);
+        Optional<Album> albumOptional = albumRepository.findAlbumByAlbumIdAndMemberMemberId(albumId,memberId);
 
-        if (albumMemberId != null && albumMemberId.equals(memberId)) {
-            Album album = albumRepository.findById(albumId).orElseThrow(() -> new EntityNotFoundException("앨범이 조회되지 않았습니다"));
+        if (albumOptional.isPresent()) {
+            Album album = albumOptional.get();
 
             AlbumInfoResponse response = new AlbumInfoResponse();
             response.setAlbumId(album.getAlbumId());
@@ -41,12 +41,12 @@ public class AlbumService {
 
             return response;
         } else {
-            throw new IllegalArgumentException("앨범이 해당 멤버의 것이 아닙니다");
+            throw new IllegalArgumentException("앨범이 조회되지 않습니다.");
         }
     }
 
     public CreateAlbumResponse createAlbum(String albumName,Long memberId) {
-        List<Album> existAlbumName = albumRepository.findByMemberId(memberId);
+        List<Album> existAlbumName = albumRepository.findByMemberMemberId(memberId);
         if (existAlbumName.stream().anyMatch(album -> album.getAlbumName().equals(albumName))) {
             throw new IllegalArgumentException("중복된 앨범명입니다.");
         }
@@ -73,7 +73,7 @@ public class AlbumService {
 
     public List<AlbumListResponse> getAlbumList(String keyword, String sort,Long id) {
         List<Album> albums;
-        albums = albumRepository.findByMemberId(id);
+        albums = albumRepository.findByMemberMemberId(id);
 
         log.info("키워드 = " + keyword);
         log.info("정렬 = " + sort);
