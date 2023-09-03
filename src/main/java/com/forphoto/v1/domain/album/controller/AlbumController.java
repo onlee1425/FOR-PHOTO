@@ -60,18 +60,20 @@ public class AlbumController {
     @ApiOperation(value = "앨범명 변경", notes = "기존에 생성된 앨범의 이름을 수정한다.")
     @PutMapping("/{albumId}")
     public ResponseEntity<UpdateAlbumNameResponse> updateAlbumName(@PathVariable("albumId") final long albumId,
+                                                                   @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails,
                                                                    @RequestBody String updateAlbumName) {
 
-        UpdateAlbumNameResponse updateAlbum = albumService.changeName(albumId, updateAlbumName);
+        UpdateAlbumNameResponse updateAlbum = albumService.changeName(albumId, updateAlbumName,memberDetails.getMemberId());
 
         return new ResponseEntity<>(updateAlbum, HttpStatus.OK);
     }
 
     @ApiOperation(value = "앨범 삭제", notes = "앨범을 삭제한다.")
     @DeleteMapping("/{albumId}")
-    public void deleteAlbum(@PathVariable("albumId") final long albumId) {
+    public void deleteAlbum(@PathVariable("albumId") final long albumId,
+                            @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
 
-        albumService.deleteAlbum(albumId);
+        albumService.deleteAlbum(albumId, memberDetails.getMemberId());
 
     }
 

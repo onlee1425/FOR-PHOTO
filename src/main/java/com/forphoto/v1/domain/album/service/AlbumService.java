@@ -71,9 +71,9 @@ public class AlbumService {
         return response;
     }
 
-    public List<AlbumListResponse> getAlbumList(String keyword, String sort,Long id) {
+    public List<AlbumListResponse> getAlbumList(String keyword, String sort,Long memberId) {
         List<Album> albums;
-        albums = albumRepository.findByMemberMemberId(id);
+        albums = albumRepository.findByMemberMemberId(memberId);
 
         log.info("키워드 = " + keyword);
         log.info("정렬 = " + sort);
@@ -106,8 +106,8 @@ public class AlbumService {
         return response;
     }
 
-    public UpdateAlbumNameResponse changeName(Long albumId, String albumName) {
-        Optional<Album> album = this.albumRepository.findById(albumId);
+    public UpdateAlbumNameResponse changeName(Long albumId, String albumName,Long memberId) {
+        Optional<Album> album = albumRepository.findAlbumByAlbumIdAndMemberMemberId(albumId,memberId);
 
         if (album.isEmpty()) {
             throw new NoSuchElementException("Album ID '%'가 존재하지 않습니다.");
@@ -126,12 +126,13 @@ public class AlbumService {
         return response;
     }
 
-    public void deleteAlbum(Long albumId) {
+    public void deleteAlbum(Long albumId,Long memberId) {
+        Optional<Album> optionalAlbum = albumRepository.findAlbumByAlbumIdAndMemberMemberId(albumId,memberId);
+        if (optionalAlbum.isEmpty()) {
+            throw new NoSuchElementException("Album ID '%'가 존재하지 않습니다.");
+        }
 
-        Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 앨범ID 입니다."));
-
+        Album album = optionalAlbum.get();
         albumRepository.delete(album);
-
     }
 }
