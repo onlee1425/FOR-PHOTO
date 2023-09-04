@@ -187,7 +187,7 @@ public class PhotoService {
         return response;
     }
 
-    public List<PhotosResponse> movePhotos(MovePhotosRequest request) {
+    public List<PhotosResponse> movePhotos(MovePhotosRequest request,Long memberId) {
         List<PhotosResponse> responses = new ArrayList<>();
 
         Long fromAlbumId = request.getFromAlbumId();
@@ -199,12 +199,16 @@ public class PhotoService {
             if (photoOptional.isPresent()) {
                 Photo photo = photoOptional.get();
 
-                Album toAlbum = albumRepository.findById(toAlbumId).orElseThrow(() ->
+                Album toAlbum = albumRepository.findAlbumByAlbumIdAndMemberMemberId(toAlbumId,memberId).orElseThrow(() ->
                         new EntityNotFoundException("사진을 옮기려는 앨범이 존재하지 않습니다"));
 
                 moveFile(fromAlbumId, toAlbumId, photo.getFileName());
+                String newOriginalUrl = "/photos/original/" + toAlbumId + "/" + photo.getFileName();
+                String newThumbUrl = "/photos/thumb/" + toAlbumId + "/" + photo.getFileName();
 
                 photo.setAlbum(toAlbum);
+                photo.setOriginalUrl(newOriginalUrl);
+                photo.setThumbUrl(newThumbUrl);
                 photoRepository.save(photo);
 
                 PhotosResponse photosResponse = new PhotosResponse();
@@ -273,8 +277,8 @@ public class PhotoService {
         return responses;
     }
 
-    public File getImageFile(Long photoId,Long albumId) {
-        Optional<Album> album = albumRepository.findById(albumId);
+    public File getImageFile(Long photoId,Long albumId,Long memberId) {
+        Optional<Album> album = albumRepository.findAlbumByAlbumIdAndMemberMemberId(albumId,memberId);
         Optional<Photo> photo = photoRepository.findById(photoId);
 
         if (photo.isEmpty()) {
@@ -286,13 +290,13 @@ public class PhotoService {
         return new File(Constants.PATH_PREFIX + photo.get().getOriginalUrl());
     }
 
-    public File getImageFilesWithZip(Long[] photoIds,Long albumId) {
+    public File getImageFilesWithZip(Long[] photoIds,Long albumId,Long memberId) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
             for (Long photoId : photoIds) {
-                File file = getImageFile(photoId,albumId);
+                File file = getImageFile(photoId,albumId,memberId);
                 FileInputStream fileInputStream = new FileInputStream(file);
                 ZipEntry zipEntry = new ZipEntry(file.getName());
                 zipOutputStream.putNextEntry(zipEntry);

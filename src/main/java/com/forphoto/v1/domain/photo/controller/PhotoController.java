@@ -68,9 +68,10 @@ public class PhotoController {
 
     @ApiOperation(value = "선택한 사진을 다른 앨범으로 옮긴다.")
     @PutMapping("/move")
-    public ResponseEntity<List<PhotosResponse>> movePhotos(@RequestBody MovePhotosRequest request) {
+    public ResponseEntity<List<PhotosResponse>> movePhotos(@RequestBody MovePhotosRequest request,
+                                                           @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
 
-        List<PhotosResponse> responses = photoService.movePhotos(request);
+        List<PhotosResponse> responses = photoService.movePhotos(request,memberDetails.getMemberId());
         return ResponseEntity.ok(responses);
 
     }
@@ -88,15 +89,16 @@ public class PhotoController {
 
     @ApiOperation(value = "사진을 다운로드 한다.")
     @GetMapping("/download")
-    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response, @PathVariable Long albumId) {
+    public void downloadPhotos(@RequestParam("photoIds") Long[] photoIds, HttpServletResponse response, @PathVariable Long albumId,
+                               @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
         try {
             if (photoIds.length == 1) {
-                File file = photoService.getImageFile(photoIds[0],albumId);
+                File file = photoService.getImageFile(photoIds[0],albumId,memberDetails.getMemberId());
                 OutputStream outputStream = response.getOutputStream();
                 IOUtils.copy(new FileInputStream(file), outputStream);
 
             } else if (photoIds.length > 1) {
-                File zipFile = photoService.getImageFilesWithZip(photoIds,albumId);
+                File zipFile = photoService.getImageFilesWithZip(photoIds,albumId,memberDetails.getMemberId());
                 response.setContentType(MediaType.APPLICATION_OCTET_STREAM.toString());
                 response.setHeader("Content-Disposition", "attachment; filename=photos.zip");
 
