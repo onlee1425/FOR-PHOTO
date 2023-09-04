@@ -42,7 +42,7 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final AlbumRepository albumRepository;
 
-    public PhotoDto savePhoto(MultipartFile file, Long albumId) {
+    public PhotoDto savePhoto(MultipartFile file, Long albumId,Long memberId) {
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null){
             throw new IllegalArgumentException("파일 이름을 확인할 수 없습니다.");
@@ -53,7 +53,7 @@ public class PhotoService {
             throw new IllegalArgumentException("유효한 이미지 파일이 아닙니다.");
         }
 
-        Optional<Album> res = albumRepository.findById(albumId);
+        Optional<Album> res = albumRepository.findAlbumByAlbumIdAndMemberMemberId(albumId,memberId);
 
         if (res.isEmpty()) {
             throw new EntityNotFoundException("앨범이 존재하지 않습니다");
@@ -245,8 +245,8 @@ public class PhotoService {
         }
     }
 
-    public List<PhotosResponse> getPhotoList(String keyword, String sort, Long albumId) {
-        Optional<Album> albumOptional = albumRepository.findById(albumId);
+    public List<PhotosResponse> getPhotoList(String keyword, String sort, Long albumId,Long memberId) {
+        Optional<Album> albumOptional = albumRepository.findAlbumByAlbumIdAndMemberMemberId(albumId,memberId);
         if (albumOptional.isEmpty()) {
             throw new EntityNotFoundException("앨범이 존재하지 않습니다.");
         }

@@ -4,6 +4,7 @@ import com.forphoto.v1.domain.photo.dto.MovePhotosRequest;
 import com.forphoto.v1.domain.photo.dto.PhotoDto;
 import com.forphoto.v1.domain.photo.dto.PhotosResponse;
 import com.forphoto.v1.domain.photo.service.PhotoService;
+import com.forphoto.v1.security.springSecurity.UserDetail.CustomMemberDetails;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
@@ -11,8 +12,10 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -30,10 +33,11 @@ public class PhotoController {
     @ApiOperation(value = "사진을 업로드 한다.")
     @PostMapping
     public ResponseEntity<List<PhotoDto>> uploadPhotos(@PathVariable("albumId") final Long albumId,
-                                                       @RequestParam("photos") MultipartFile[] files) {
+                                                       @RequestParam("photos") MultipartFile[] files,
+                                                       @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
         List<PhotoDto> photos = new ArrayList<>();
         for (MultipartFile file : files) {
-            PhotoDto photoDto = photoService.savePhoto(file, albumId);
+            PhotoDto photoDto = photoService.savePhoto(file, albumId,memberDetails.getMemberId());
             photos.add(photoDto);
         }
         return new ResponseEntity<>(photos, HttpStatus.OK);
@@ -75,9 +79,10 @@ public class PhotoController {
     @GetMapping
     public ResponseEntity<List<PhotosResponse>> getPhotos(@RequestParam(value = "keyword", required = false, defaultValue = "") final String keyword,
                                                           @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort,
-                                                          @PathVariable Long albumId) {
+                                                          @PathVariable Long albumId,
+                                                          @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
 
-        List<PhotosResponse> photoList = photoService.getPhotoList(keyword, sort, albumId);
+        List<PhotosResponse> photoList = photoService.getPhotoList(keyword, sort, albumId,memberDetails.getMemberId());
         return new ResponseEntity<>(photoList, HttpStatus.OK);
     }
 
