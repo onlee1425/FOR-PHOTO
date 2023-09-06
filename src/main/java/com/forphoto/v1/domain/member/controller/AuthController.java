@@ -5,12 +5,17 @@ import com.forphoto.v1.domain.member.dto.LoginResponse;
 import com.forphoto.v1.domain.member.dto.RegisterRequest;
 import com.forphoto.v1.domain.member.entity.Member;
 import com.forphoto.v1.domain.member.service.AuthService;
+import com.forphoto.v1.security.springSecurity.UserDetail.CustomMemberDetails;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
 
 
 @Slf4j
@@ -34,8 +39,21 @@ public class AuthController {
     @ApiOperation(value = "로그인", notes = "사용자의 이메일과 비밀번호로 로그인한다.")
     @PostMapping("/login")
     public ResponseEntity<Object> memberLogin(@RequestBody LoginRequest request) {
+
         LoginResponse response = authService.login(request);
 
         return ResponseEntity.ok().headers(response.getHeaders()).body(response.getBody());
+    }
+
+    @ApiOperation(value = "로그아웃", notes = "사용자의 토큰을 로그아웃 처리한다.")
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@ApiIgnore @RequestHeader("Authorization") String accessToken,
+                                         @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails,
+                                         HttpServletResponse response) {
+
+        authService.logout(accessToken,memberDetails.getMemberId(), memberDetails.getAuthorities().toString());
+        authService.deleteRefreshTokenCookie(response);
+
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 }
