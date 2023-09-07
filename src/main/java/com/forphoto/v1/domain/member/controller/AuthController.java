@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -51,9 +52,17 @@ public class AuthController {
                                          @ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails,
                                          HttpServletResponse response) {
 
-        authService.logout(accessToken,memberDetails.getMemberId(), memberDetails.getAuthorities().toString());
+        authService.logout(accessToken, memberDetails.getMemberId(), memberDetails.getAuthorities().toString());
         authService.deleteRefreshTokenCookie(response);
 
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
+
+    @ApiOperation(value = "액세스 토큰 갱신", notes = "액세스 토큰 만료시, 리프레시 토큰을 이용하여 액세스 토큰을 재발급 한다.")
+    @PostMapping("/token/reissue")
+    public HttpHeaders tokenReissue(@ApiIgnore @AuthenticationPrincipal CustomMemberDetails memberDetails) {
+
+        return authService.tokenReissue(memberDetails.getMemberId(), memberDetails.getAuthorities().toString());
+    }
+
 }

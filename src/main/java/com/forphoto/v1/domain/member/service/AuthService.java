@@ -62,7 +62,7 @@ public class AuthService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("authorization", "Bearer " + token.getAccessToken());
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
-                .path("/api/token/reissue")
+                .path("/api/user/token/reissue")
                 .httpOnly(true)
                 .sameSite("Strict")
                 .build();
@@ -79,7 +79,7 @@ public class AuthService {
             log.info("멤버 로그아웃 진행");
             if (redis.opsForValue().get("memberId : " + memberId) != null) {
                 Long expiration = jwtTokenProvider.getExpiration(accessToken);
-                jwtTokenUtil.setBlackListToken(memberId,accessToken,expiration);
+                jwtTokenUtil.setBlackListToken(memberId, accessToken, expiration);
                 jwtTokenUtil.deleteRefreshToken(memberId);
             }
         }
@@ -89,8 +89,29 @@ public class AuthService {
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
         Cookie refreshTokenCookie = new Cookie("refreshToken", null);
         refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setPath("/api/token/reissue");
+        refreshTokenCookie.setPath("/api/user/token/reissue");
 
         response.addCookie(refreshTokenCookie);
+    }
+
+    public HttpHeaders tokenReissue(Long memberId, String role) {
+        HttpHeaders headers = new HttpHeaders();
+
+        if (role.equals("[MEMBER]")) {
+            JwtToken token = jwtTokenProvider.generateToken(memberId);
+            redis.opsForValue().set("memberId : " + memberId, token.getRefreshToken(),
+                    token.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+
+            headers.add("authorization", "Bearer " + token.getAccessToken());
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
+                    .path("/api/user/token/reissue")
+                    .httpOnly(true)
+                    .build();
+            headers.add("Set-Cookie",cookie.toString());
+
+            return headers;
+        } else {
+            throw new RuntimeException("유효하지 않은 회원입니다.");
+        }
     }
 }
