@@ -59,12 +59,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,jwtTokenUtil),
                         UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
 
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
                 .authorizeRequests()
