@@ -1,10 +1,7 @@
 package com.forphoto.v1.domain.photo.entity;
 
 import com.forphoto.v1.domain.album.entity.Album;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -12,6 +9,7 @@ import java.util.Date;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
