@@ -31,6 +31,8 @@ public class Member {
 
     private String email;
 
+    private String provider;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private Date createdAt;

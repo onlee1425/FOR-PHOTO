@@ -49,7 +49,7 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        Member member = memberRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.findByEmailAndProvider(request.getEmail(),request.getProvider())
                 .orElseThrow(() -> new RuntimeException("해당하는 회원이 없습니다."));
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new RuntimeException("올바르지 않은 비밀번호 입니다.");
