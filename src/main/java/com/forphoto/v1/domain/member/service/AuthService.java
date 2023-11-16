@@ -43,6 +43,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .memberRole(MemberRole.MEMBER)
+                .provider("DIRECT")
                 .build();
 
         return memberRepository.save(member);
